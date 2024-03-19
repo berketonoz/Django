@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from random import randint
 
 # Create your views here.
 from django.http import HttpResponse
@@ -18,5 +19,12 @@ def get_date(request):
     template = "<html>" \
                 "Today's date is {}" \
                "</html>".format(today)
+    return HttpResponse(content=template)
+
+def get_rng(request):
+    rng = randint(0,10)
+    template = "<html>" \
+                "Random number generated is: {}" \
+               "</html>".format(rng)
     return HttpResponse(content=template)
                         
