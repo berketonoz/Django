@@ -40,6 +40,34 @@ def login_request(request):
     else:
         return render(request, 'onlinecourse/user_login.html', context)
 
+def registration_request(request):
+    context = {}
+    # If it is a GET request, just render the registration page
+    if request.method == 'GET':
+        return render(request, 'onlinecourse/user_registration.html', context)
+    # If it is a POST request
+    elif request.method == 'POST':
+        username = request.POST['username']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        password = request.POST['psw']
+
+        user_exist = False
+        try:
+            # Check if user already exists
+            User.objects.get(username=username)
+            user_exist = True
+        except:
+            # If not, simply log this is a new user
+            logger.debug("{} is new user".format(username))
+        # If it is a new user
+        if not user_exist:
+            # Create user in auth_user table
+            user = User.objects.create_user(user)
+            login(request, user)
+            return redirect("onlinecourse:popular_course_list")
+        else:
+            return render(request, 'onlinecourse/user_registration.html', context)
 
 # Add a class-based course list view
 class CourseListView(generic.ListView):
@@ -50,15 +78,12 @@ class CourseListView(generic.ListView):
        courses = Course.objects.order_by('-total_enrollment')[:10]
        return courses
 
-
 # Add a generic course details view
 class CourseDetailsView(generic.DetailView):
     model = Course
     template_name = 'onlinecourse/course_detail.html'
 
-
 class EnrollView(View):
-
     # Handles get request
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get('pk')
